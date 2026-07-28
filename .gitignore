@@ -1,10 +1,23 @@
 # Dependencies
 node_modules/
 
-# Environment variables
+# Environment variables & secrets
 .env
 .env.local
 .env.*.local
+
+# Kubernetes Secrets
+secret.yml
+secret.yaml
+secrets.yml
+secrets.yaml
+k8s/**/secret.yml
+k8s/**/secret.yaml
+k8s/**/secrets.yml
+k8s/**/secrets.yaml
+!*.example
+!*.example.yml
+!*.example.yaml
 
 # File uploads
 uploads/*
