@@ -15,6 +15,12 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static uploads
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: "UP",
+    service: "pma-backend"
+  });
+});
 
 // API Routes
 app.use('/api', apiRoutes);

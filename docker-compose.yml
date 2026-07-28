@@ -1,6 +1,6 @@
 services:
   frontend:
-    build: ./frontend
+    image: asimabbasi1029/pma-frontend:latest
     container_name: frontend
     ports:
       - "5173:5173"
@@ -10,7 +10,7 @@ services:
       - pma-network
 
   backend:
-    build: ./backend
+    image: asimabbasi1029/pma-backend:latest
     container_name: backend
     ports:
       - "5000:5000"
