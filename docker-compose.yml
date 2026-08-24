@@ -1,15 +1,17 @@
 services:
   frontend:
+    build: ./frontend
     image: asimabbasi1029/pma-frontend:latest
     container_name: frontend
     ports:
-      - "5173:5173"
+      - "5173:80"
     depends_on:
       - backend
     networks:
       - pma-network
 
   backend:
+    build: ./backend
     image: asimabbasi1029/pma-backend:latest
     container_name: backend
     ports:
@@ -40,6 +42,7 @@ services:
       POSTGRES_DB: ${DB_NAME}
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./backend/src/config/schema.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
