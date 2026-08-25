@@ -17,10 +17,6 @@ module "vpc" {
 
 module "ecr" {
   source = "../../modules/ecr"
-
-  project_name     = var.project_name
-  environment      = var.environment
-  repository_names = var.ecr_repository_names
 }
 
 # module "rds" {
