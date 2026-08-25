@@ -2,17 +2,26 @@
 # Modules will be instantiated and linked here in subsequent phases.
 
 module "vpc" {
-    source = "../../modules/vpc"
-  
+  source = "../../modules/vpc"
+
+  name                 = "${var.project_name}-${var.environment}"
+  vpc_cidr             = var.vpc_cidr
+  availability_zones   = var.availability_zones
+  public_subnet_cidrs  = var.public_subnet_cidrs
+  private_subnet_cidrs = var.private_subnet_cidrs
 }
 
 # module "eks" {
 #   source = "../../modules/eks"
 # }
 
-# module "ecr" {
-#   source = "../../modules/ecr"
-# }
+module "ecr" {
+  source = "../../modules/ecr"
+
+  project_name     = var.project_name
+  environment      = var.environment
+  repository_names = var.ecr_repository_names
+}
 
 # module "rds" {
 #   source = "../../modules/rds"

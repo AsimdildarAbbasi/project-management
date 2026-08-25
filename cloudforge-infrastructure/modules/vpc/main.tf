@@ -1,5 +1,3 @@
-# CloudForge VPC Module
-# Core resource definitions will be implemented in subsequent phases.
 resource "aws_vpc" "this" {
   cidr_block           = var.vpc_cidr
   enable_dns_support   = true
@@ -10,7 +8,7 @@ resource "aws_vpc" "this" {
   }
 }
 
-
+# Public Subnets (ALB, NAT Gateways)
 resource "aws_subnet" "public" {
   count = length(var.public_subnet_cidrs)
 
@@ -20,10 +18,12 @@ resource "aws_subnet" "public" {
   map_public_ip_on_launch = true
 
   tags = {
-    Name = "${var.name}-public-${count.index + 1}"
+    Name                     = "${var.name}-public-${count.index + 1}"
+    "kubernetes.io/role/elb" = "1"
   }
 }
 
+# Private Subnets (EKS Nodes, RDS, Redis)
 resource "aws_subnet" "private" {
   count = length(var.private_subnet_cidrs)
 
@@ -32,10 +32,12 @@ resource "aws_subnet" "private" {
   availability_zone = var.availability_zones[count.index]
 
   tags = {
-    Name = "${var.name}-private-${count.index + 1}"
+    Name                              = "${var.name}-private-${count.index + 1}"
+    "kubernetes.io/role/internal-elb" = "1"
   }
 }
 
+# Internet Gateway
 resource "aws_internet_gateway" "this" {
   vpc_id = aws_vpc.this.id
 
@@ -44,6 +46,28 @@ resource "aws_internet_gateway" "this" {
   }
 }
 
+# Elastic IP for NAT Gateway
+resource "aws_eip" "nat" {
+  domain = "vpc"
+
+  tags = {
+    Name = "${var.name}-nat-eip"
+  }
+}
+
+# NAT Gateway (Single NAT in public subnet for cost optimization)
+resource "aws_nat_gateway" "this" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public[0].id
+
+  tags = {
+    Name = "${var.name}-nat-gw"
+  }
+
+  depends_on = [aws_internet_gateway.this]
+}
+
+# Public Route Table
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.this.id
 
@@ -57,10 +81,29 @@ resource "aws_route_table" "public" {
   }
 }
 
+# Private Route Table
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.this.id
 
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.this.id
+  }
+
+  tags = {
+    Name = "${var.name}-private-rt"
+  }
+}
+
+# Route Table Associations
 resource "aws_route_table_association" "public" {
-  count = length(var.public_subnet_cidrs)
-
+  count          = length(var.public_subnet_cidrs)
   subnet_id      = aws_subnet.public[count.index].id
   route_table_id = aws_route_table.public.id
+}
+
+resource "aws_route_table_association" "private" {
+  count          = length(var.private_subnet_cidrs)
+  subnet_id      = aws_subnet.private[count.index].id
+  route_table_id = aws_route_table.private.id
 }
