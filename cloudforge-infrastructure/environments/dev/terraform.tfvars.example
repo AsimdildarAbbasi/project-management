@@ -1,8 +1,10 @@
 # General Configuration
-aws_region   = "us-east-1"
-environment  = "dev"
-project_name = "cloudforge"
-github_repo  = "AsimdildarAbbasi/project-management"
+aws_region      = "us-east-1"
+environment     = "dev"
+project_name    = "cloudforge"
+github_repo     = "AsimdildarAbbasi/project-management"
+github_owner_id = "129249106"
+github_repo_id  = "1311091416"
 
 # VPC Network Configuration
 vpc_cidr             = "10.0.0.0/16"

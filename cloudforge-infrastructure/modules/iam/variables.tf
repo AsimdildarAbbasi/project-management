@@ -30,7 +30,18 @@ variable "github_repo" {
   description = "GitHub repository path in format 'owner/repo' for OIDC federation"
   type        = string
   default     = "AsimdildarAbbasi/project-management"
+}
 
+variable "github_owner_id" {
+  description = "GitHub user/org numeric ID for immutable OIDC subject matching"
+  type        = string
+  default     = "129249106"
+}
+
+variable "github_repo_id" {
+  description = "GitHub repository numeric ID for immutable OIDC subject matching"
+  type        = string
+  default     = "1311091416"
 }
 
 variable "tags" {

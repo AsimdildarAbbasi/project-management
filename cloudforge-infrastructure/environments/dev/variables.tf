@@ -22,6 +22,18 @@ variable "github_repo" {
   default     = "AsimdildarAbbasi/project-management"
 }
 
+variable "github_owner_id" {
+  type        = string
+  description = "GitHub user/org numeric ID for immutable OIDC subject matching"
+  default     = "129249106"
+}
+
+variable "github_repo_id" {
+  type        = string
+  description = "GitHub repository numeric ID for immutable OIDC subject matching"
+  default     = "1311091416"
+}
+
 variable "vpc_cidr" {
   type        = string
   description = "CIDR block for the CloudForge VPC"

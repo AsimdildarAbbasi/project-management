@@ -67,6 +67,8 @@ module "iam" {
   name_prefix     = local.name_prefix
   environment     = var.environment
   github_repo     = var.github_repo
+  github_owner_id = var.github_owner_id
+  github_repo_id  = var.github_repo_id
   s3_bucket_arn   = module.s3.bucket_arn
   sqs_queue_arn   = module.sqs.queue_arn
   app_secrets_arn = aws_secretsmanager_secret.app_secrets.arn

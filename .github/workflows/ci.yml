@@ -90,6 +90,10 @@ jobs:
           aws-region: us-east-1
           audience: sts.amazonaws.com
 
+      - name: Verify AWS STS Caller Identity
+        run: |
+          aws sts get-caller-identity
+
       - name: Login to Amazon ECR
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
@@ -164,6 +168,10 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
           aws-region: us-east-1
           audience: sts.amazonaws.com
+
+      - name: Verify AWS STS Caller Identity
+        run: |
+          aws sts get-caller-identity
 
       - name: Login to Amazon ECR
         id: login-ecr
