@@ -4,17 +4,9 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'frontend/**'
-      - 'backend/**'
-      - '.github/workflows/ci.yml'
   pull_request:
     branches:
       - main
-    paths:
-      - 'frontend/**'
-      - 'backend/**'
-      - '.github/workflows/ci.yml'
   workflow_dispatch:
 
 permissions:
@@ -47,10 +39,10 @@ jobs:
           filters: |
             frontend:
               - 'frontend/**'
-              - '.github/workflows/ci.yml'
+              - '.github/workflows/**'
             backend:
               - 'backend/**'
-              - '.github/workflows/ci.yml'
+              - '.github/workflows/**'
 
   # ---------------------------------------------------------------------------
   # 2. Frontend CI Job: Lint, Build, Scan, and Push to ECR
