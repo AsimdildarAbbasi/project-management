@@ -65,10 +65,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -90,9 +90,8 @@ jobs:
       - name: Configure AWS Credentials (Keyless OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME || 'arn:aws:iam::125167623870:role/cloudforge-dev-github-actions-ecr-role' }}
           aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
-          audience: sts.amazonaws.com
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -144,10 +143,10 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js 22
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
 
@@ -161,9 +160,8 @@ jobs:
       - name: Configure AWS Credentials (Keyless OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME || 'arn:aws:iam::125167623870:role/cloudforge-dev-github-actions-ecr-role' }}
           aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
-          audience: sts.amazonaws.com
 
       - name: Login to Amazon ECR
         id: login-ecr
