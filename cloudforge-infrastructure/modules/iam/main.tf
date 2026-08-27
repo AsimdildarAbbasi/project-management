@@ -63,21 +63,87 @@ resource "aws_iam_role_policy_attachment" "node_AmazonEC2ContainerRegistryReadOn
 }
 
 # -----------------------------------------------------------------------------
-# 3. Workload S3 Access Policy (Prepared for IRSA / Pod Identity)
+# 3. Workload Policy: Backend API (S3 Uploads, SQS Enqueue, Secrets Read)
 # -----------------------------------------------------------------------------
-resource "aws_iam_policy" "s3_access" {
-  name        = "${var.name_prefix}-s3-workload-policy"
-  description = "IAM policy granting backend pods access to the S3 uploads bucket"
+resource "aws_iam_policy" "backend_workload" {
+  name        = "${var.name_prefix}-backend-workload-policy"
+  description = "IAM policy granting backend pods access to S3 uploads, SQS job enqueuing, and Secrets Manager"
 
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
+        Sid    = "S3UploadsAccess"
         Effect = "Allow"
         Action = [
           "s3:PutObject",
           "s3:GetObject",
           "s3:DeleteObject",
+          "s3:ListBucket"
+        ]
+        Resource = var.s3_bucket_arn != "" ? [
+          var.s3_bucket_arn,
+          "${var.s3_bucket_arn}/*"
+        ] : ["arn:aws:s3:::*"]
+      },
+      {
+        Sid    = "SQSEnqueueAccess"
+        Effect = "Allow"
+        Action = [
+          "sqs:SendMessage",
+          "sqs:GetQueueAttributes",
+          "sqs:GetQueueUrl"
+        ]
+        Resource = var.sqs_queue_arn != "" ? [
+          var.sqs_queue_arn
+        ] : ["arn:aws:sqs:::*"]
+      },
+      {
+        Sid    = "SecretsManagerRead"
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret"
+        ]
+        Resource = var.app_secrets_arn != "" ? [
+          var.app_secrets_arn
+        ] : ["arn:aws:secretsmanager:::*"]
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+# -----------------------------------------------------------------------------
+# 4. Workload Policy: SQS Worker (SQS Dequeue/Process/Delete, S3 Read)
+# -----------------------------------------------------------------------------
+resource "aws_iam_policy" "worker_workload" {
+  name        = "${var.name_prefix}-worker-workload-policy"
+  description = "IAM policy granting background worker pods access to consume SQS jobs and access S3"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "SQSConsumeAccess"
+        Effect = "Allow"
+        Action = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:ChangeMessageVisibility",
+          "sqs:GetQueueAttributes",
+          "sqs:GetQueueUrl"
+        ]
+        Resource = var.sqs_queue_arn != "" ? [
+          var.sqs_queue_arn
+        ] : ["arn:aws:sqs:::*"]
+      },
+      {
+        Sid    = "S3ReadAccess"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
           "s3:ListBucket"
         ]
         Resource = var.s3_bucket_arn != "" ? [
@@ -92,11 +158,11 @@ resource "aws_iam_policy" "s3_access" {
 }
 
 # -----------------------------------------------------------------------------
-# 4. Workload SQS Access Policy (Prepared for IRSA / Worker Pod Identity)
+# 5. Controller Policy: External Secrets Operator (Secrets Manager Read)
 # -----------------------------------------------------------------------------
-resource "aws_iam_policy" "sqs_access" {
-  name        = "${var.name_prefix}-sqs-workload-policy"
-  description = "IAM policy granting backend and worker pods access to SQS queues"
+resource "aws_iam_policy" "external_secrets" {
+  name        = "${var.name_prefix}-external-secrets-policy"
+  description = "IAM policy granting External Secrets Operator permission to read application secrets"
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -104,15 +170,116 @@ resource "aws_iam_policy" "sqs_access" {
       {
         Effect = "Allow"
         Action = [
-          "sqs:SendMessage",
-          "sqs:ReceiveMessage",
-          "sqs:DeleteMessage",
-          "sqs:GetQueueAttributes",
-          "sqs:GetQueueUrl"
+          "secretsmanager:GetResourcePolicy",
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:DescribeSecret",
+          "secretsmanager:ListSecretVersionIds"
         ]
-        Resource = var.sqs_queue_arn != "" ? [
-          var.sqs_queue_arn
-        ] : ["arn:aws:sqs:::*"]
+        Resource = ["*"]
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+# -----------------------------------------------------------------------------
+# 6. Controller Policy: AWS Load Balancer Controller
+# -----------------------------------------------------------------------------
+resource "aws_iam_policy" "aws_load_balancer_controller" {
+  name        = "${var.name_prefix}-aws-load-balancer-controller-policy"
+  description = "IAM policy for AWS Load Balancer Controller to manage ALBs and Target Groups"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "iam:CreateServiceLinkedRole",
+          "ec2:DescribeAccountAttributes",
+          "ec2:DescribeAddresses",
+          "ec2:DescribeAvailabilityZones",
+          "ec2:DescribeInternetGateways",
+          "ec2:DescribeVpcs",
+          "ec2:DescribeVpcPeeringConnections",
+          "ec2:DescribeSubnets",
+          "ec2:DescribeSecurityGroups",
+          "ec2:DescribeInstances",
+          "ec2:DescribeNetworkInterfaces",
+          "ec2:DescribeTags",
+          "ec2:GetCoipPoolUsage",
+          "ec2:DescribeCoipPools",
+          "elasticloadbalancing:DescribeLoadBalancers",
+          "elasticloadbalancing:DescribeLoadBalancerAttributes",
+          "elasticloadbalancing:DescribeListeners",
+          "elasticloadbalancing:DescribeListenerCertificates",
+          "elasticloadbalancing:DescribeSSLPolicies",
+          "elasticloadbalancing:DescribeRules",
+          "elasticloadbalancing:DescribeTargetGroups",
+          "elasticloadbalancing:DescribeTargetGroupAttributes",
+          "elasticloadbalancing:DescribeTargetHealth",
+          "elasticloadbalancing:DescribeTags"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "cognito-idp:DescribeUserPoolClient",
+          "acm:ListCertificates",
+          "acm:DescribeCertificate",
+          "iam:ListServerCertificates",
+          "iam:GetServerCertificate",
+          "waf-regional:GetWebACL",
+          "waf-regional:GetWebACLForResource",
+          "waf-regional:AssociateWebACL",
+          "waf-regional:DisassociateWebACL",
+          "wafv2:GetWebACL",
+          "wafv2:GetWebACLForResource",
+          "wafv2:AssociateWebACL",
+          "wafv2:DisassociateWebACL",
+          "shield:GetSubscriptionState",
+          "shield:DescribeProtection",
+          "shield:CreateProtection",
+          "shield:DeleteProtection"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:CreateSecurityGroup",
+          "ec2:CreateTags",
+          "ec2:DeleteTags",
+          "ec2:DeleteSecurityGroup"
+        ]
+        Resource = "*"
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "elasticloadbalancing:CreateLoadBalancer",
+          "elasticloadbalancing:CreateTargetGroup",
+          "elasticloadbalancing:CreateListener",
+          "elasticloadbalancing:DeleteListener",
+          "elasticloadbalancing:CreateRule",
+          "elasticloadbalancing:DeleteRule",
+          "elasticloadbalancing:SetWebAcl",
+          "elasticloadbalancing:ModifyLoadBalancerAttributes",
+          "elasticloadbalancing:SetIpAddressType",
+          "elasticloadbalancing:SetSecurityGroups",
+          "elasticloadbalancing:SetSubnets",
+          "elasticloadbalancing:DeleteLoadBalancer",
+          "elasticloadbalancing:ModifyTargetGroup",
+          "elasticloadbalancing:ModifyTargetGroupAttributes",
+          "elasticloadbalancing:DeleteTargetGroup",
+          "elasticloadbalancing:RegisterTargets",
+          "elasticloadbalancing:DeregisterTargets"
+        ]
+        Resource = "*"
       }
     ]
   })

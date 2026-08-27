@@ -13,8 +13,8 @@ private_subnet_cidrs = ["10.0.11.0/24", "10.0.12.0/24", "10.0.13.0/24"]
 ecr_repository_names = ["frontend", "backend", "worker"]
 
 # Amazon EKS Cluster Configuration
-eks_cluster_version     = "1.30"
-eks_node_instance_types = ["t3.medium"]
+eks_cluster_version     = "1.36"
+eks_node_instance_types = ["m7i-flex.large"]
 eks_desired_size        = 2
 eks_min_size            = 1
 eks_max_size            = 3

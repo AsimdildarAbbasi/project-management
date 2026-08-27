@@ -3,6 +3,11 @@ output "cluster_name" {
   value       = aws_eks_cluster.this.name
 }
 
+output "cluster_arn" {
+  description = "ARN of the EKS cluster"
+  value       = aws_eks_cluster.this.arn
+}
+
 output "cluster_endpoint" {
   description = "Endpoint for EKS cluster control plane"
   value       = aws_eks_cluster.this.endpoint

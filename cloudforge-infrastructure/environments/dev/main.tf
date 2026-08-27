@@ -64,11 +64,12 @@ module "sqs" {
 module "iam" {
   source = "../../modules/iam"
 
-  name_prefix   = local.name_prefix
-  environment   = var.environment
-  s3_bucket_arn = module.s3.bucket_arn
-  sqs_queue_arn = module.sqs.queue_arn
-  tags          = local.common_tags
+  name_prefix     = local.name_prefix
+  environment     = var.environment
+  s3_bucket_arn   = module.s3.bucket_arn
+  sqs_queue_arn   = module.sqs.queue_arn
+  app_secrets_arn = aws_secretsmanager_secret.app_secrets.arn
+  tags            = local.common_tags
 }
 
 # -----------------------------------------------------------------------------

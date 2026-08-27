@@ -6,7 +6,7 @@ variable "cluster_name" {
 variable "cluster_version" {
   description = "Kubernetes version to use for the EKS cluster"
   type        = string
-  default     = "1.30"
+  default     = "1.36"
 }
 
 variable "vpc_id" {
@@ -32,7 +32,7 @@ variable "node_role_arn" {
 variable "node_instance_types" {
   description = "EC2 instance types for EKS worker nodes"
   type        = list(string)
-  default     = ["t3.medium"]
+  default     = ["m7i-flex.large"]
 }
 
 variable "desired_size" {

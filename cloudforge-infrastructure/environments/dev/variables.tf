@@ -52,13 +52,13 @@ variable "ecr_repository_names" {
 variable "eks_cluster_version" {
   type        = string
   description = "Kubernetes version for EKS control plane"
-  default     = "1.30"
+  default     = "1.36"
 }
 
 variable "eks_node_instance_types" {
   type        = list(string)
   description = "EC2 instance types for EKS managed node group"
-  default     = ["t3.medium"]
+  default     = ["m7i-flex.large"]
 }
 
 variable "eks_desired_size" {
@@ -165,3 +165,4 @@ variable "sqs_max_receive_count" {
   description = "Max delivery attempts before routing to Dead Letter Queue"
   default     = 3
 }
+

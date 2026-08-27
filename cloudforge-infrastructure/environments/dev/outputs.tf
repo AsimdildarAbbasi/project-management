@@ -47,14 +47,24 @@ output "eks_node_role_arn" {
   value       = module.iam.node_role_arn
 }
 
-output "s3_workload_policy_arn" {
-  description = "ARN of the S3 workload IAM policy for pod identity / IRSA"
-  value       = module.iam.s3_access_policy_arn
+output "backend_workload_policy_arn" {
+  description = "ARN of the Backend Workload IAM Policy"
+  value       = module.iam.backend_workload_policy_arn
 }
 
-output "sqs_workload_policy_arn" {
-  description = "ARN of the SQS workload IAM policy for pod identity / IRSA"
-  value       = module.iam.sqs_access_policy_arn
+output "worker_workload_policy_arn" {
+  description = "ARN of the Worker Workload IAM Policy"
+  value       = module.iam.worker_workload_policy_arn
+}
+
+output "external_secrets_policy_arn" {
+  description = "ARN of the External Secrets Operator IAM Policy"
+  value       = module.iam.external_secrets_policy_arn
+}
+
+output "aws_load_balancer_controller_policy_arn" {
+  description = "ARN of the AWS Load Balancer Controller IAM Policy"
+  value       = module.iam.aws_load_balancer_controller_policy_arn
 }
 
 # -----------------------------------------------------------------------------
@@ -63,6 +73,11 @@ output "sqs_workload_policy_arn" {
 output "eks_cluster_name" {
   description = "Name of the EKS cluster"
   value       = module.eks.cluster_name
+}
+
+output "eks_cluster_arn" {
+  description = "ARN of the EKS cluster"
+  value       = module.eks.cluster_arn
 }
 
 output "eks_cluster_endpoint" {

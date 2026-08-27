@@ -60,6 +60,18 @@ variable "deletion_protection" {
   default     = false
 }
 
+variable "multi_az" {
+  description = "Specifies if the RDS instance is multi-AZ"
+  type        = bool
+  default     = false
+}
+
+variable "backup_retention_period" {
+  description = "Days to retain automated backups"
+  type        = number
+  default     = 1
+}
+
 variable "skip_final_snapshot" {
   description = "Skip final snapshot before DB deletion in dev"
   type        = bool

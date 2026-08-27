@@ -18,12 +18,22 @@ output "node_role_name" {
   value       = aws_iam_role.node.name
 }
 
-output "s3_access_policy_arn" {
-  description = "ARN of the S3 workload IAM Policy"
-  value       = aws_iam_policy.s3_access.arn
+output "backend_workload_policy_arn" {
+  description = "ARN of the Backend Workload IAM Policy"
+  value       = aws_iam_policy.backend_workload.arn
 }
 
-output "sqs_access_policy_arn" {
-  description = "ARN of the SQS workload IAM Policy"
-  value       = aws_iam_policy.sqs_access.arn
+output "worker_workload_policy_arn" {
+  description = "ARN of the Worker Workload IAM Policy"
+  value       = aws_iam_policy.worker_workload.arn
+}
+
+output "external_secrets_policy_arn" {
+  description = "ARN of the External Secrets Operator IAM Policy"
+  value       = aws_iam_policy.external_secrets.arn
+}
+
+output "aws_load_balancer_controller_policy_arn" {
+  description = "ARN of the AWS Load Balancer Controller IAM Policy"
+  value       = aws_iam_policy.aws_load_balancer_controller.arn
 }
