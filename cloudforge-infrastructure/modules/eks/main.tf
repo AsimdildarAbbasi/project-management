@@ -160,7 +160,42 @@ resource "aws_iam_role_policy_attachment" "ebs_csi_driver" {
 }
 
 # -----------------------------------------------------------------------------
-# 6. EKS Managed Node Group
+# 6. AWS Load Balancer Controller IAM Role (IRSA)
+# -----------------------------------------------------------------------------
+resource "aws_iam_role" "aws_load_balancer_controller" {
+  count = var.aws_load_balancer_controller_policy_arn != "" ? 1 : 0
+  name  = "${var.cluster_name}-alb-controller-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = aws_iam_openid_connect_provider.this.arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${replace(aws_eks_cluster.this.identity[0].oidc[0].issuer, "https://", "")}:sub" = "system:serviceaccount:kube-system:aws-load-balancer-controller"
+            "${replace(aws_eks_cluster.this.identity[0].oidc[0].issuer, "https://", "")}:aud" = "sts.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "aws_load_balancer_controller" {
+  count      = var.aws_load_balancer_controller_policy_arn != "" ? 1 : 0
+  policy_arn = var.aws_load_balancer_controller_policy_arn
+  role       = aws_iam_role.aws_load_balancer_controller[0].name
+}
+
+# -----------------------------------------------------------------------------
+# 7. EKS Managed Node Group
 # -----------------------------------------------------------------------------
 resource "aws_eks_node_group" "this" {
   cluster_name    = aws_eks_cluster.this.name

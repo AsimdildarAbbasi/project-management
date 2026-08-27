@@ -59,6 +59,12 @@ variable "enabled_cluster_log_types" {
   default     = ["api", "audit", "authenticator"]
 }
 
+variable "aws_load_balancer_controller_policy_arn" {
+  description = "IAM Policy ARN for the AWS Load Balancer Controller"
+  type        = string
+  default     = ""
+}
+
 variable "tags" {
   description = "Tags to apply to EKS resources"
   type        = map(string)

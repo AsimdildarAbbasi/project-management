@@ -2,10 +2,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: backend
-  namespace: pma
+  namespace: cloudforge-dev
+  labels:
+    app: backend
+    environment: dev
+    project: cloudforge
 
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
 
   selector:
     matchLabels:
@@ -15,15 +24,17 @@ spec:
     metadata:
       labels:
         app: backend
+        environment: dev
 
     spec:
       containers:
         - name: backend
-          image: asimabbasi1029/pma-backend:latest
+          image: 125167623870.dkr.ecr.us-east-1.amazonaws.com/cloudforge-dev-backend:latest
           imagePullPolicy: Always
 
           ports:
-            - containerPort: 5000
+            - name: http
+              containerPort: 5000
 
           envFrom:
             - configMapRef:
@@ -37,6 +48,8 @@ spec:
               port: 5000
             initialDelaySeconds: 10
             periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
 
           livenessProbe:
             httpGet:
@@ -44,12 +57,13 @@ spec:
               port: 5000
             initialDelaySeconds: 20
             periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
 
           resources:
             requests:
-              cpu: "100m"
-              memory: "128Mi"
-
+              cpu: "150m"
+              memory: "256Mi"
             limits:
               cpu: "500m"
               memory: "512Mi"

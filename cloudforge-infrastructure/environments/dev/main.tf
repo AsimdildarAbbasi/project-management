@@ -81,17 +81,18 @@ module "iam" {
 module "eks" {
   source = "../../modules/eks"
 
-  cluster_name        = "${local.name_prefix}-eks"
-  cluster_version     = var.eks_cluster_version
-  vpc_id              = module.vpc.vpc_id
-  subnet_ids          = module.vpc.private_subnet_ids
-  cluster_role_arn    = module.iam.cluster_role_arn
-  node_role_arn       = module.iam.node_role_arn
-  node_instance_types = var.eks_node_instance_types
-  desired_size        = var.eks_desired_size
-  min_size            = var.eks_min_size
-  max_size            = var.eks_max_size
-  tags                = local.common_tags
+  cluster_name                            = "${local.name_prefix}-eks"
+  cluster_version                         = var.eks_cluster_version
+  vpc_id                                  = module.vpc.vpc_id
+  subnet_ids                              = module.vpc.private_subnet_ids
+  cluster_role_arn                        = module.iam.cluster_role_arn
+  node_role_arn                           = module.iam.node_role_arn
+  node_instance_types                     = var.eks_node_instance_types
+  desired_size                            = var.eks_desired_size
+  min_size                                = var.eks_min_size
+  max_size                                = var.eks_max_size
+  aws_load_balancer_controller_policy_arn = module.iam.aws_load_balancer_controller_policy_arn
+  tags                                    = local.common_tags
 }
 
 # -----------------------------------------------------------------------------

@@ -2,10 +2,19 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend
-  namespace: pma
+  namespace: cloudforge-dev
+  labels:
+    app: frontend
+    environment: dev
+    project: cloudforge
 
 spec:
-  replicas: 1
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
 
   selector:
     matchLabels:
@@ -15,21 +24,40 @@ spec:
     metadata:
       labels:
         app: frontend
+        environment: dev
 
     spec:
       containers:
         - name: frontend
-          image: asimabbasi1029/pma-frontend:latest
+          image: 125167623870.dkr.ecr.us-east-1.amazonaws.com/cloudforge-dev-frontend:latest
           imagePullPolicy: Always
 
           ports:
-            - containerPort: 5173
+            - name: http
+              containerPort: 80
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
 
           resources:
             requests:
               cpu: "100m"
               memory: "128Mi"
-
             limits:
-              cpu: "500m"
-              memory: "512Mi"
+              cpu: "250m"
+              memory: "256Mi"

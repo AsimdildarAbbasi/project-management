@@ -2,11 +2,21 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: backend-config
-  namespace: pma
+  namespace: cloudforge-dev
+  labels:
+    app: backend
+    environment: dev
+    project: cloudforge
 
 data:
   PORT: "5000"
-  DB_HOST: "postgres-service"
+  NODE_ENV: "production"
+  DB_HOST: "cloudforge-dev-postgres.c2hy4uqa2vws.us-east-1.rds.amazonaws.com"
   DB_PORT: "5432"
   DB_NAME: "pma_db"
   DB_SSL: "false"
+  REDIS_HOST: "cloudforge-dev-redis.qyio1j.0001.use1.cache.amazonaws.com"
+  REDIS_PORT: "6379"
+  S3_BUCKET_NAME: "cloudforge-dev-uploads-7e2a76f4"
+  AWS_REGION: "us-east-1"
+  SQS_QUEUE_URL: "https://sqs.us-east-1.amazonaws.com/125167623870/cloudforge-dev-jobs"

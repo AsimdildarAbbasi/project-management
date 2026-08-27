@@ -1,4 +1,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: pma
+  name: cloudforge-dev
+  labels:
+    environment: dev
+    project: cloudforge

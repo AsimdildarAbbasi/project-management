@@ -116,6 +116,11 @@ output "eks_oidc_provider_url" {
   value       = module.eks.oidc_provider_url
 }
 
+output "aws_load_balancer_controller_role_arn" {
+  description = "ARN of the AWS Load Balancer Controller IAM Role"
+  value       = module.eks.aws_load_balancer_controller_role_arn
+}
+
 # -----------------------------------------------------------------------------
 # 5. Amazon RDS PostgreSQL Outputs
 # -----------------------------------------------------------------------------
