@@ -99,6 +99,11 @@ resource "aws_eks_cluster" "this" {
     endpoint_public_access  = true
   }
 
+  access_config {
+    authentication_mode                         = "API_AND_CONFIG_MAP"
+    bootstrap_cluster_creator_admin_permissions = true
+  }
+
   enabled_cluster_log_types = var.enabled_cluster_log_types
 
   tags = merge(var.tags, {
@@ -122,7 +127,40 @@ resource "aws_iam_openid_connect_provider" "this" {
 }
 
 # -----------------------------------------------------------------------------
-# 5. EKS Managed Node Group
+# 5. EBS CSI Driver IAM Role (IRSA)
+# -----------------------------------------------------------------------------
+resource "aws_iam_role" "ebs_csi_driver" {
+  name = "${var.cluster_name}-ebs-csi-driver-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Principal = {
+          Federated = aws_iam_openid_connect_provider.this.arn
+        }
+        Action = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "${replace(aws_eks_cluster.this.identity[0].oidc[0].issuer, "https://", "")}:sub" = "system:serviceaccount:kube-system:ebs-csi-controller-sa"
+            "${replace(aws_eks_cluster.this.identity[0].oidc[0].issuer, "https://", "")}:aud" = "sts.amazonaws.com"
+          }
+        }
+      }
+    ]
+  })
+
+  tags = var.tags
+}
+
+resource "aws_iam_role_policy_attachment" "ebs_csi_driver" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+  role       = aws_iam_role.ebs_csi_driver.name
+}
+
+# -----------------------------------------------------------------------------
+# 6. EKS Managed Node Group
 # -----------------------------------------------------------------------------
 resource "aws_eks_node_group" "this" {
   cluster_name    = aws_eks_cluster.this.name
@@ -149,5 +187,45 @@ resource "aws_eks_node_group" "this" {
 
   depends_on = [
     aws_eks_cluster.this
+  ]
+}
+
+# -----------------------------------------------------------------------------
+# 7. Core EKS Add-ons
+# -----------------------------------------------------------------------------
+resource "aws_eks_addon" "vpc_cni" {
+  cluster_name = aws_eks_cluster.this.name
+  addon_name   = "vpc-cni"
+
+  tags = var.tags
+}
+
+resource "aws_eks_addon" "coredns" {
+  cluster_name = aws_eks_cluster.this.name
+  addon_name   = "coredns"
+
+  tags = var.tags
+
+  depends_on = [
+    aws_eks_node_group.this
+  ]
+}
+
+resource "aws_eks_addon" "kube_proxy" {
+  cluster_name = aws_eks_cluster.this.name
+  addon_name   = "kube-proxy"
+
+  tags = var.tags
+}
+
+resource "aws_eks_addon" "ebs_csi" {
+  cluster_name             = aws_eks_cluster.this.name
+  addon_name               = "aws-ebs-csi-driver"
+  service_account_role_arn = aws_iam_role.ebs_csi_driver.arn
+
+  tags = var.tags
+
+  depends_on = [
+    aws_eks_node_group.this
   ]
 }

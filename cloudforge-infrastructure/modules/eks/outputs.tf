@@ -47,3 +47,8 @@ output "node_group_arn" {
   description = "ARN of the EKS Managed Node Group"
   value       = aws_eks_node_group.this.arn
 }
+
+output "ebs_csi_driver_role_arn" {
+  description = "ARN of the EBS CSI Driver IAM Role"
+  value       = aws_iam_role.ebs_csi_driver.arn
+}
