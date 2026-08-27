@@ -37,3 +37,13 @@ output "aws_load_balancer_controller_policy_arn" {
   description = "ARN of the AWS Load Balancer Controller IAM Policy"
   value       = aws_iam_policy.aws_load_balancer_controller.arn
 }
+
+output "github_actions_role_arn" {
+  description = "ARN of the IAM Role assumed by GitHub Actions for ECR image publishing"
+  value       = aws_iam_role.github_actions_ecr.arn
+}
+
+output "github_actions_role_name" {
+  description = "Name of the IAM Role assumed by GitHub Actions for ECR image publishing"
+  value       = aws_iam_role.github_actions_ecr.name
+}

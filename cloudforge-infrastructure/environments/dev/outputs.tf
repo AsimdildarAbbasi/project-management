@@ -67,6 +67,11 @@ output "aws_load_balancer_controller_policy_arn" {
   value       = module.iam.aws_load_balancer_controller_policy_arn
 }
 
+output "github_actions_role_arn" {
+  description = "ARN of the IAM Role assumed by GitHub Actions for ECR image publishing"
+  value       = module.iam.github_actions_role_arn
+}
+
 # -----------------------------------------------------------------------------
 # 4. Amazon EKS Cluster Outputs
 # -----------------------------------------------------------------------------

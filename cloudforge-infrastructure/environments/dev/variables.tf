@@ -16,6 +16,12 @@ variable "project_name" {
   default     = "cloudforge"
 }
 
+variable "github_repo" {
+  type        = string
+  description = "GitHub repository in format 'owner/repo' for GitHub Actions OIDC federation"
+  default     = "AsimdildarAbbasi/project-management"
+}
+
 variable "vpc_cidr" {
   type        = string
   description = "CIDR block for the CloudForge VPC"
