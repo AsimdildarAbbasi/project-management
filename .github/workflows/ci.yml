@@ -48,9 +48,11 @@ jobs:
   # 2. Frontend CI Job: Lint, Build, Scan, and Push to ECR
   # ---------------------------------------------------------------------------
   frontend-ci:
+    name: Frontend CI (Lint, Test, Scan & ECR Push)
     needs: changes
     if: ${{ needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
+    permissions:
       id-token: write
       contents: read
       security-events: write
