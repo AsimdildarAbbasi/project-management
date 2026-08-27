@@ -30,6 +30,7 @@ variable "github_repo" {
   description = "GitHub repository path in format 'owner/repo' for OIDC federation"
   type        = string
   default     = "AsimdildarAbbasi/project-management"
+              
 }
 
 variable "tags" {
