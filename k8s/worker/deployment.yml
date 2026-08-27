@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
         - name: worker
-          image: 125167623870.dkr.ecr.us-east-1.amazonaws.com/cloudforge-dev-worker:latest
+          image: 125167623870.dkr.ecr.us-east-1.amazonaws.com/cloudforge-dev-backend:latest
           imagePullPolicy: Always
 
           envFrom:

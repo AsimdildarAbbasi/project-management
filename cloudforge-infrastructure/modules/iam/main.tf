@@ -251,6 +251,8 @@ resource "aws_iam_policy" "aws_load_balancer_controller" {
         Action = [
           "ec2:AuthorizeSecurityGroupIngress",
           "ec2:RevokeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupEgress",
           "ec2:CreateSecurityGroup",
           "ec2:CreateTags",
           "ec2:DeleteTags",
@@ -265,8 +267,10 @@ resource "aws_iam_policy" "aws_load_balancer_controller" {
           "elasticloadbalancing:CreateTargetGroup",
           "elasticloadbalancing:CreateListener",
           "elasticloadbalancing:DeleteListener",
+          "elasticloadbalancing:ModifyListener",
           "elasticloadbalancing:CreateRule",
           "elasticloadbalancing:DeleteRule",
+          "elasticloadbalancing:ModifyRule",
           "elasticloadbalancing:SetWebAcl",
           "elasticloadbalancing:ModifyLoadBalancerAttributes",
           "elasticloadbalancing:SetIpAddressType",
@@ -277,7 +281,9 @@ resource "aws_iam_policy" "aws_load_balancer_controller" {
           "elasticloadbalancing:ModifyTargetGroupAttributes",
           "elasticloadbalancing:DeleteTargetGroup",
           "elasticloadbalancing:RegisterTargets",
-          "elasticloadbalancing:DeregisterTargets"
+          "elasticloadbalancing:DeregisterTargets",
+          "elasticloadbalancing:AddTags",
+          "elasticloadbalancing:RemoveTags"
         ]
         Resource = "*"
       }
